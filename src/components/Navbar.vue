@@ -32,11 +32,7 @@ const logout = async () => {
 <template>
   <nav class="flex gap-4 p-4 bg-gray-100">
     <div class="flex justify-between items-center w-full">
-      <div class="flex gap-4">
-        <router-link to="/employees" class="hover:underline"
-          >Employees</router-link
-        >
-      </div>
+      <img src="/assets/logo.svg" alt="Logo" class="h-14 w-auto" />
       <div class="flex items-center gap-4">
         <span class="border p-2 rounded-md">{{ user.name }}</span>
         <Button class="hover:underline" @click="logout">Logout</Button>

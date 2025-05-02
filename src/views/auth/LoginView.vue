@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Fetch from "@/lib/fetch";
 import router from "@/router";
 import { onMounted, reactive } from "vue";
@@ -43,7 +44,7 @@ onMounted(() => {
   <div
     class="min-h-screen flex flex-col items-center justify-center bg-background"
   >
-    <img src="../../assets/logo.svg" alt="Logo" class="h-16 mb-8" />
+    <img src="/assets/logo.svg" alt="Logo" class="h-16 mb-8" />
     <Card class="w-[400px]">
       <CardHeader>
         <CardTitle>Login</CardTitle>
@@ -54,12 +55,7 @@ onMounted(() => {
       <CardContent>
         <div class="space-y-4">
           <div class="space-y-2">
-            <label
-              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              for="email"
-            >
-              Email
-            </label>
+            <Label for="email"> Email </Label>
             <Input
               id="email"
               v-model="credentials.email"
@@ -68,12 +64,7 @@ onMounted(() => {
             />
           </div>
           <div class="space-y-2">
-            <label
-              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              for="password"
-            >
-              Password
-            </label>
+            <Label for="password"> Password </Label>
             <Input
               id="password"
               v-model="credentials.password"
@@ -83,8 +74,12 @@ onMounted(() => {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter class="flex flex-col">
         <Button class="w-full" @click="handleLogin"> Sign In </Button>
+
+        <Button :variant="'link'">
+          <router-link to="/register" class="">to: Register</router-link>
+        </Button>
       </CardFooter>
     </Card>
   </div>

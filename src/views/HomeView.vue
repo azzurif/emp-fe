@@ -3,14 +3,16 @@ import Navbar from "@/components/Navbar.vue";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -23,12 +25,49 @@ import {
 import Fetch from "@/lib/fetch";
 import router from "@/router";
 import { onMounted, ref, watch, watchEffect } from "vue";
+import { toast } from "vue-sonner";
 
 const employees = ref([]);
 const divisions = ref([]);
+const positions = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 const selectDivision = ref("");
+
+const selectCreateDivision = ref("");
+const selectCreatePosition = ref("");
+const name = ref("");
+const email = ref("");
+const gender = ref("1");
+const status = ref("1");
+const handleCreateEmployee = async (e: Event) => {
+  e.preventDefault();
+
+  const payload = {
+    division_id: selectCreateDivision.value,
+    position_id: selectCreatePosition.value,
+    name: name.value,
+    email: email.value,
+    gender: gender.value,
+    status: status.value,
+  };
+  const response = await Fetch({
+    url: "employees",
+    method: "POST",
+    body: JSON.stringify(payload),
+    auth: true,
+  });
+  router.push("/");
+  if (response.errors || response.message) {
+    toast("Error create employee", {
+      description: response.message,
+      action: {
+        label: "Close",
+      },
+    });
+  }
+};
+
 const loadEmployees = async () => {
   const response = await Fetch({
     url: `employees?page=${currentPage.value}`,
@@ -45,11 +84,11 @@ onMounted(async () => {
     router.push("/login");
   }
 
-  [employees.value, divisions.value] = await Promise.all([
+  [employees.value, divisions.value, positions.value] = await Promise.all([
     Fetch({ url: "employees", method: "GET", auth: true }).then((val) => val),
     Fetch({ url: "divisions", method: "GET", auth: true }).then((val) => val),
+    Fetch({ url: "positions", method: "GET", auth: true }).then((val) => val),
   ]);
-  console.log({ employees, divisions });
 });
 
 watch(selectDivision, async (newVal) => {
@@ -96,7 +135,7 @@ const changePage = (page: number) => {
       <h1 class="text-2xl font-semibold">Employees</h1>
 
       <div class="flex items-center justify-between gap-2">
-        <div>
+        <div class="flex items-center gap-2">
           <p>Filter</p>
           <Select v-model="selectDivision">
             <SelectTrigger class="w-[180px]">
@@ -116,93 +155,114 @@ const changePage = (page: number) => {
             </SelectContent>
           </Select>
         </div>
+
         <div>
           <Dialog>
             <DialogTrigger as-child>
               <Button>New Employee</Button>
             </DialogTrigger>
-
-            <DialogContent>
+            <DialogContent class="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Add New Employee</DialogTitle>
                 <DialogDescription>
                   Fill in the employee details below
                 </DialogDescription>
               </DialogHeader>
-
-              <!-- Form -->
-              <div class="space-y-4">
-                <Input
-                  v-model="name"
-                  type="text"
-                  placeholder="Name"
-                  class="w-full"
-                />
-                <Input
-                  v-model="email"
-                  type="email"
-                  placeholder="Email"
-                  class="w-full"
-                />
-
-                <Select v-model="positionId" class="w-full">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Posiition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Position</SelectLabel>
-                      <SelectItem
-                        v-for="pos in positions.data"
-                        :key="pos.id"
-                        :value="pos.id"
-                      >
-                        {{ pos.name }}
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                <Select v-model="divisionId" class="w-full">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Division" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Division</SelectLabel>
-                      <SelectItem
-                        v-for="div in divisions.data"
-                        :key="div.id"
-                        :value="div.id"
-                      >
-                        {{ div.name }}
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                <div class="flex gap-4">
-                  <label class="flex items-center gap-2">
-                    <Input type="radio" :value="1" v-model="gender" />Male
-                  </label>
-                  <label class="flex items-center gap-2">
-                    <Input type="radio" :value="0" v-model="gender" />Female
-                  </label>
+              <form class="grid gap-4 py-4" @submit="handleCreateEmployee">
+                <div class="space-y-2">
+                  <Label for="division_id">Division</Label>
+                  <Select v-model="selectCreateDivision" id="division_id">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Select a division" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Division</SelectLabel>
+                        <SelectItem
+                          v-for="div in divisions.data"
+                          :key="div.id"
+                          :value="div.id"
+                        >
+                          {{ div.name }}
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div class="flex items-center gap-2">
-                  <Input type="checkbox" :value="1" v-model="status" /> Active
-                  <Input type="checkbox" :value="0" v-model="status" />
-                  Nno-Active
+                <div class="space-y-2">
+                  <Label for="position_id">Division</Label>
+                  <Select v-model="selectCreatePosition" id="position_id">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Select a position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Position</SelectLabel>
+                        <SelectItem
+                          v-for="pos in positions.data"
+                          :key="pos.id"
+                          :value="pos.id"
+                        >
+                          {{ pos.name }}
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
 
-              <DialogFooter class="mt-4">
-                <DialogClose as-child>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button @click="submitForm">Save</Button>
-              </DialogFooter>
+                <div class="space-y-2">
+                  <Label for="name" class="text-right"> Name </Label>
+                  <Input v-model="name" type="text" placeholder="Name" />
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="email" class="text-right"> Email </Label>
+                  <Input v-model="email" type="email" placeholder="Email" />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="space-y-2">
+                    <Label>Status</Label>
+                    <RadioGroup
+                      default-value="1"
+                      :orientation="'horizontal'"
+                      v-model="status"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <RadioGroupItem id="active" :value="1" />
+                        <Label for="active">Active</Label>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <RadioGroupItem id="nonactice" :value="0" />
+                        <Label for="nonactice">Non-active</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label>Gender</Label>
+                    <RadioGroup
+                      default-value="1"
+                      :orientation="'horizontal'"
+                      v-model="gender"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <RadioGroupItem id="male" :value="1" />
+                        <Label for="male">Male</Label>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <RadioGroupItem id="female" :value="0" />
+                        <Label for="female">Female</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button type="submit"> Save changes </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         </div>
