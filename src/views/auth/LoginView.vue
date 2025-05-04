@@ -12,8 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Fetch from "@/lib/fetch";
 import router from "@/router";
+import { useAuthStore } from "@/store/auth";
 import { onMounted, reactive } from "vue";
 
+const auth = useAuthStore();
 const credentials = reactive({
   email: "",
   password: "",
@@ -26,7 +28,8 @@ const handleLogin = async () => {
   });
 
   if (response.token) {
-    window.localStorage.setItem("token", response.token);
+    auth.setToken(response.token, 3600);
+    console.log("success login");
     router.push("/");
   } else {
     alert(response.message);
@@ -78,7 +81,7 @@ onMounted(() => {
         <Button class="w-full" @click="handleLogin"> Sign In </Button>
 
         <Button :variant="'link'">
-          <router-link to="/register" class="">to: Register</router-link>
+          <RouterLink to="/register" class="">to: Register</RouterLink>
         </Button>
       </CardFooter>
     </Card>

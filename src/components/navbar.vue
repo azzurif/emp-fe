@@ -1,10 +1,25 @@
 <script setup lang="ts">
 import Fetch from "@/lib/fetch";
 import router from "@/router";
-import { Button } from "./ui/button";
+import { useAuthStore } from "@/store/auth";
+import type { User } from "@/types";
 import { onMounted, ref } from "vue";
+import { Button } from "./ui/button";
 
-const user = ref([]);
+const user = ref<User | null>(null);
+
+const auth = useAuthStore();
+const logout = async () => {
+  const response = await Fetch({
+    url: "auth/logout",
+    method: "POST",
+    auth: true,
+  });
+  if (response) {
+    auth.clearToken();
+    router.push("/login");
+  }
+};
 
 onMounted(async () => {
   user.value = (
@@ -15,18 +30,6 @@ onMounted(async () => {
     })
   ).data;
 });
-
-const logout = async () => {
-  const response = await Fetch({
-    url: "auth/logout",
-    method: "POST",
-    auth: true,
-  });
-  if (response) {
-    window.localStorage.removeItem("token");
-    router.push("/login");
-  }
-};
 </script>
 
 <template>
@@ -34,7 +37,7 @@ const logout = async () => {
     <div class="flex justify-between items-center w-full">
       <img src="/assets/logo.svg" alt="Logo" class="h-14 w-auto" />
       <div class="flex items-center gap-4">
-        <span class="border p-2 rounded-md">{{ user.name }}</span>
+        <span class="border p-2 rounded-md">{{ user?.name }}</span>
         <Button class="hover:underline" @click="logout">Logout</Button>
       </div>
     </div>

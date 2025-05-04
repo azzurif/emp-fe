@@ -12,16 +12,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Fetch from "@/lib/fetch";
 import router from "@/router";
+import { useAuthStore } from "@/store/auth";
 import { onMounted, reactive } from "vue";
 
+const auth = useAuthStore();
 const credentials = reactive({
   name: "",
   email: "",
   password: "",
   confirmPassword: "",
 });
-
-const handleRegister = async () => {
+const register = async () => {
   if (credentials.password !== credentials.confirmPassword) {
     alert("Passwords do not match");
     return;
@@ -38,7 +39,7 @@ const handleRegister = async () => {
   });
 
   if (response.token) {
-    window.localStorage.setItem("token", response.token);
+    auth.setToken(response.token, 3600);
     router.push("/");
   } else {
     alert(response.message);
@@ -103,10 +104,10 @@ onMounted(() => {
         </div>
       </CardContent>
       <CardFooter class="flex flex-col">
-        <Button class="w-full" @click="handleRegister">Sign Up</Button>
+        <Button class="w-full" @click="register">Sign Up</Button>
 
         <Button :variant="'link'">
-          <router-link to="/login" class="">to: Login</router-link>
+          <RouterLink to="/login" class="">to: Login</RouterLink>
         </Button>
       </CardFooter>
     </Card>
