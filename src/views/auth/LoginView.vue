@@ -37,7 +37,7 @@ const handleLogin = async () => {
 };
 
 onMounted(() => {
-  if (window.localStorage.getItem("token")) {
+  if (auth.isValid) {
     router.push("/");
   }
 });

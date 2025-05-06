@@ -20,7 +20,6 @@ import type {
 } from "@/types";
 import { onMounted, ref, watch, watchEffect } from "vue";
 
-const auth= useAuthStore()
 const employees = ref<EmployeeResource | null>(null);
 const divisions = ref<DivisionResource | null>(null);
 const positions = ref<PositionResource | null>(null);
@@ -40,10 +39,6 @@ const loadEmployees = async () => {
 };
 
 onMounted(async () => {
-  if (!auth.isValid) {
-    router.push("/login");
-  }
-
   [employees.value, divisions.value, positions.value] = await Promise.all([
     Fetch({ url: "employees", method: "GET", auth: true }).then((val) => val),
     Fetch({ url: "divisions", method: "GET", auth: true }).then((val) => val),
